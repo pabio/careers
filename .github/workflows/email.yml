@@ -2,6 +2,8 @@ name: Email CI
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron:  "0 9 * * 2,4" # 9 am on Tuesdays and Thursdays
 
 defaults:
   run:

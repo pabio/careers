@@ -32,7 +32,7 @@ const airtableEmail = async () => {
   const result = await got(
     `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(
       AIRTABLE_TABLE_NAME
-    )}?maxRecords=5&filterByFormula=${encodeURIComponent(
+    )}?maxRecords=100&filterByFormula=${encodeURIComponent(
       // All applicants with the `Status` of "Out"
       "{Status} = 'Out'"
     )}`,

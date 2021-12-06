@@ -56,7 +56,6 @@ const airtableEmail = async () => {
       new SendEmailCommand({
         Destination: {
           ToAddresses: [`"${item.fields.Name}" <${item.fields["Your Email"]}>`],
-          BccAddresses: ["Anand Chowdhary <anand@pabio.com>"],
         },
         Message: {
           Body: {

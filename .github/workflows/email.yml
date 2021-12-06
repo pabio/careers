@@ -1,0 +1,38 @@
+name: Email CI
+
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: scripts
+
+jobs:
+  build:
+    name: Send emails
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run script
+        run: node airtable-email.mjs
+        env:
+          # Airtable
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
+          AIRTABLE_TABLE_NAME: ${{ secrets.AIRTABLE_TABLE_NAME }}
+
+          # AWS SES
+          EMAIL_SES_REGION: ${{ secrets.EMAIL_SES_REGION }}
+          EMAIL_SES_ACCESS_KEY_ID: ${{ secrets.EMAIL_SES_ACCESS_KEY_ID }}
+          EMAIL_SES_SECRET_ACCESS_KEY: ${{ secrets.EMAIL_SES_SECRET_ACCESS_KEY }}

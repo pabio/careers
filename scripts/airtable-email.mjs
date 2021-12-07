@@ -46,6 +46,8 @@ const airtableEmail = async () => {
     i++;
 
     if (
+      // Ensure records has a position
+      !item.fields.Position ||
       // Ensure record has an email
       !item.fields["Your Email"] ||
       // Ensure record has a name
@@ -66,7 +68,7 @@ const airtableEmail = async () => {
               Status: "Emailed out",
               Notes: `${
                 item.fields.Notes || ""
-              }\n\nPabio Escobar: I didn't find a name or valid email, so I skipped emailing this applicant.`.trim(),
+              }\n\nPabio Escobar: I didn't find a name, position, or valid email, so I skipped emailing this applicant.`.trim(),
             },
           },
         }
@@ -173,4 +175,9 @@ You're receiving this email because you applied for the position of ${
   console.log("Completed Airtable email script");
 };
 
-airtableEmail();
+airtableEmail()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });

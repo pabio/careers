@@ -38,15 +38,42 @@ const airtableEmail = async () => {
     )}`,
     { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } }
   ).json();
-  const data = result.records.filter(
-    // Ensure records have an email and name
-    (item) => item.fields["Your Email"] && item.fields.Name
-  );
-  console.log(`Sending ${data.length} emails`);
+  console.log(`Sending ${result.records.length} emails`);
 
   // Loop through each and send the email
   let i = 0;
-  for await (const item of data) {
+  for await (const item of result.records) {
+    if (
+      // Ensure record has an email
+      !item.fields["Your Email"] ||
+      // Ensure record has a name
+      !item.fields.Name ||
+      // Ensure email is valid
+      // @link https://stackoverflow.com/a/9204568/1656944
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(item.fields["Your Email"])
+    ) {
+      // Move this item to "Emailed out" and update comment
+      await got.patch(
+        `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(
+          AIRTABLE_TABLE_NAME
+        )}/${item.id}`,
+        {
+          headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` },
+          json: {
+            fields: {
+              Status: "Emailed out",
+              Notes: `${
+                item.fields.Notes || ""
+              }\n\nPabio Escobar: I didn't find a name or valid email, so I skipped emailing this applicant.`.trim(),
+            },
+          },
+        }
+      );
+
+      console.log(`Skipped invalid entry ${i}/${result.records.length}`);
+      continue;
+    }
+
     const firstName = `${item.fields.Name.charAt(
       0
     ).toUpperCase()}${item.fields.Name.slice(1).toLowerCase()}`.split(" ")[0];
@@ -55,7 +82,13 @@ const airtableEmail = async () => {
     await client.send(
       new SendEmailCommand({
         Destination: {
-          ToAddresses: [`"${item.fields.Name}" <${item.fields["Your Email"]}>`],
+          ToAddresses: [
+            // Transform name to title case
+            `"${item.fields.Name.trim().replace(
+              /\w\S*/g,
+              (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+            )}" <${item.fields["Your Email"]}>`,
+          ],
         },
         Message: {
           Body: {
@@ -133,7 +166,7 @@ You're receiving this email because you applied for the position of ${
     );
 
     i++;
-    console.log(`Sent email ${i}/${data.length}`);
+    console.log(`Sent email ${i}/${result.records.length}`);
   }
 
   console.log("Completed Airtable email script");

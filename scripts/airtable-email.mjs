@@ -43,6 +43,8 @@ const airtableEmail = async () => {
   // Loop through each and send the email
   let i = 0;
   for await (const item of result.records) {
+    i++;
+
     if (
       // Ensure record has an email
       !item.fields["Your Email"] ||
@@ -165,7 +167,6 @@ You're receiving this email because you applied for the position of ${
       }
     );
 
-    i++;
     console.log(`Sent email ${i}/${result.records.length}`);
   }
 

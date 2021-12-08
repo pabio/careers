@@ -49,12 +49,12 @@ const airtableEmail = async () => {
       // Ensure records has a position
       !item.fields.Position ||
       // Ensure record has an email
-      !item.fields["Your Email"] ||
+      !item.fields.Email ||
       // Ensure record has a name
       !item.fields.Name ||
       // Ensure email is valid
       // @link https://stackoverflow.com/a/9204568/1656944
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(item.fields["Your Email"])
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(item.fields.Email)
     ) {
       // Move this item to "Emailed out" and update comment
       await got.patch(
@@ -91,7 +91,7 @@ const airtableEmail = async () => {
             `"${item.fields.Name.trim().replace(
               /\w\S*/g,
               (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
-            )}" <${item.fields["Your Email"]}>`,
+            )}" <${item.fields.Email}>`,
           ],
         },
         Message: {
